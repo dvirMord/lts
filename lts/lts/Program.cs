@@ -1,4 +1,6 @@
 using lts.Configuration;
+using lts.Interfaces;
+using lts.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IKafkaConsumerFactory, KafkaConsumerFactory>();
+builder.Services.AddSingleton<ITelemetryStreamService, TelemetryStreamService>();
 
 // Kafka Configuration
 builder.Services.Configure<KafkaConsumerConfig>(

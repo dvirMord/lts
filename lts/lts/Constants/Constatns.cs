@@ -1,4 +1,4 @@
-﻿namespace lts.Constants;
+namespace lts.Constants;
 
 public static class Constatns
 {
@@ -13,6 +13,12 @@ public static class Constatns
     {
         public const string StartListeningMessage = "Started listening on partition {0}";
         public const string StopListeningMessage = "Stopped listening on partition {0}";
+
+        // TelemetryStreamController messages
+        public const string StreamStarted = "Telemetry streaming started for partition {0}";
+        public const string StreamAlreadyRunning = "Stream for partition {0} is already running.";
+        public const string StreamStopped = "Telemetry streaming stopped for partition {0}";
+        public const string StreamNotFound = "No active stream found for partition {0}.";
     }
 
     public static class SwaggerConfig
@@ -41,5 +47,20 @@ public static class Constatns
         public const string Topic = "telemetry.packets.raw";
         public const string GroupIdPrefix = "raven-consumer";
         public const string GroupIdFormat = "{0}-{1}-{2}";
+    }
+
+    public static class TelemetryStreamMessages
+    {
+        public const string StreamAlreadyActive = "Stream for partition {Partition} is already active.";
+        public const string StreamStartedSuccess = "Successfully started telemetry stream for partition {Partition}.";
+        public const string StreamStopping = "Stopping telemetry stream for partition {Partition}...";
+        public const string StreamNotRunning = "Cannot stop stream: partition {Partition} was not running.";
+        public const string ConsumerWorkerAttached = "Kafka consumer worker attached and actively consuming partition {Partition}.";
+        public const string PayloadReceived = "[Partition {Partition} | Offset {Offset}] Payload received: {Data}";
+        public const string TelemetryFrameParsed = "[Partition {Partition} | Offset {Offset}] Parsed Telemetry Frame:\n{FrameSummary}";
+        public const string ConsumerLoopCancelled = "Consume loop for partition {Partition} gracefully cancelled.";
+        public const string ConsumerLoopError = "Unexpected error in consume loop for partition {Partition}.";
+        public const string ConsumerResourcesCleanedUp = "Consumer resources cleaned up for partition {Partition}.";
+        public const string ConsumeException = "Kafka consume exception: {Reason}";
     }
 }

@@ -1,5 +1,6 @@
-﻿using Confluent.Kafka;
+using Confluent.Kafka;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 using lts.Configuration;
 using lts.Interfaces;
@@ -9,10 +10,12 @@ using static lts.Constants.Constatns.Logging;
 namespace lts.Services;
 public class KafkaConsumerService : IKafkaConsumerService
 {
-    private readonly IConsumer<Null, string> _kafkaConsumer;
+    private readonly IConsumer<string?, string> _kafkaConsumer;
+    private readonly ILogger<KafkaConsumerService> _logger;
 
-    public KafkaConsumerService(IOptions<KafkaConsumerConfig> configOptions, int partition)
+    public KafkaConsumerService(IOptions<KafkaConsumerConfig> configOptions, int partition, ILogger<KafkaConsumerService> logger)
     {
+        this._logger = logger;
         KafkaConsumerConfig settings = configOptions.Value;
 
         ConsumerConfig consumerConfig = new ConsumerConfig
@@ -23,13 +26,13 @@ public class KafkaConsumerService : IKafkaConsumerService
             AutoOffsetReset = settings.AutoOffsetReset
         };
 
-        this._kafkaConsumer = new ConsumerBuilder<Null, string>(consumerConfig).Build();
+        this._kafkaConsumer = new ConsumerBuilder<string?, string>(consumerConfig).Build();
 
         TopicPartition topicPartition = new TopicPartition(settings.Topic, new Partition(partition));
         this._kafkaConsumer.Assign(topicPartition);
     }
 
-    public ConsumeResult<Null, string>? ConsumeTelemetryFrames(CancellationToken ct = default)
+    public ConsumeResult<string?, string>? ConsumeTelemetryFrames(CancellationToken ct = default)
     {
         try
         {
@@ -41,7 +44,7 @@ public class KafkaConsumerService : IKafkaConsumerService
         }
         catch (ConsumeException ex)
         {
-            Console.WriteLine(string.Format(KafkaConsumeError, ex.Error.Reason));
+            this._logger.LogError(ex, KafkaConsumeError, ex.Error.Reason);
             return null;
         }
     }
