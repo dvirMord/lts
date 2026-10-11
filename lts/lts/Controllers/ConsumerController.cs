@@ -6,11 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/lts/v1")]
 public class ConsumerController : ControllerBase
 {
-    public ConsumerController()
-    {
-        
-    }
-
     [HttpPost("start")]
     public async Task<IActionResult> StartListening([FromBody] PartitionRequest request, CancellationToken cancellationToken)
     {

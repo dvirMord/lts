@@ -31,5 +31,15 @@ public static class Constatns
         public const string ApplicationStarting = "LTS API is starting...";
         public const string EnvironmentDev = "Running in Development mode";
         public const string EnvironmentProd = "Running in Production mode";
+        public const string KafkaConsumeError = "Kafka consume error: {0}";
+    }
+
+    public static class KafkaDefaults
+    {
+        public const string SectionName = "KafkaConsumer";
+        public const string BootstrapServers = "localhost:9092";
+        public const string Topic = "telemetry.packets.raw";
+        public const string GroupIdPrefix = "raven-consumer";
+        public const string GroupIdFormat = "{0}-{1}-{2}";
     }
 }
