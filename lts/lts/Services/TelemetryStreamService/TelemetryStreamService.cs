@@ -13,11 +13,13 @@ namespace lts.Services;
 public class TelemetryStreamService: ITelemetryStreamService
 {
     private readonly IKafkaConsumerFactory _kafkaConsumerFactory;
+    private readonly IGeoServerClient _geoServerClient;
     private readonly ILogger<TelemetryStreamService> _logger;
     private readonly ConcurrentDictionary<int, CancellationTokenSource> _activeStreams = new();
-    public TelemetryStreamService(IKafkaConsumerFactory kafkaConsumerFactory, ILogger<TelemetryStreamService> logger)
+    public TelemetryStreamService(IKafkaConsumerFactory kafkaConsumerFactory, IGeoServerClient geoServerClient, ILogger<TelemetryStreamService> logger)
     {
         this._kafkaConsumerFactory = kafkaConsumerFactory;
+        this._geoServerClient = geoServerClient;
         this._logger = logger;
     }
 
@@ -33,7 +35,7 @@ public class TelemetryStreamService: ITelemetryStreamService
         {
             return false;
         }
-        Task.Run(() => ConsumeLoop(partition, cts.Token), cts.Token);
+        Task.Run(async () => await ConsumeLoop(partition, cts.Token), cts.Token);
         this._logger.LogInformation(TelemetryStreamMessages.StreamStartedSuccess, partition);
         return true;
     }
@@ -62,7 +64,7 @@ public class TelemetryStreamService: ITelemetryStreamService
         return this._activeStreams.Keys.ToList();
     }
 
-    private void ConsumeLoop(int partition, CancellationToken ct)
+    private async Task ConsumeLoop(int partition, CancellationToken ct)
     {
         using var consumer = this._kafkaConsumerFactory.CreateConsumer(partition);
 
@@ -88,6 +90,20 @@ public class TelemetryStreamService: ITelemetryStreamService
                                 result.Partition.Value,
                                 result.Offset.Value,
                                 frameSummary);
+
+                            var raycastRequest = frame.ToRaycastRequest();
+                            var raycastResult = await this._geoServerClient.CalculateIntersectionAsync(raycastRequest, ct);
+                            if (raycastResult != null)
+                            {
+                                this._logger.LogInformation(
+                                    TelemetryStreamMessages.RaycastIntersectionResult,
+                                    result.Partition.Value,
+                                    raycastResult.HasIntersection,
+                                    raycastResult.GroundLatitude,
+                                    raycastResult.GroundLongitude,
+                                    raycastResult.GroundAltitudeMeters,
+                                    raycastResult.SlantRangeMeters);
+                            }
                         }
                         else
                         {

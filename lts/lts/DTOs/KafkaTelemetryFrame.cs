@@ -52,6 +52,29 @@ public class KafkaTelemetryFrame
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? AdditionalFields { get; set; }
 
+    public RaycastRequestDto ToRaycastRequest()
+    {
+        return new RaycastRequestDto
+        {
+            SensorLatitude = ParseDouble(SensorLatitude),
+            SensorLongitude = ParseDouble(SensorLongitude),
+            SensorAltitudeMeters = ParseDouble(SensorTrueAltitude),
+            PlatformHeadingDeg = ParseDouble(PlatformHeadingAngle),
+            PlatformPitchDeg = ParseDouble(PlatformPitchAngle),
+            PlatformRollDeg = ParseDouble(PlatformRollAngle),
+            GimbalAzimuthDeg = ParseDouble(SensorRelativeAzimuthAngle),
+            GimbalElevationDeg = ParseDouble(SensorRelativeElevationAngle),
+            GimbalRollDeg = 0.0
+        };
+    }
+
+    private static double ParseDouble(string? value)
+    {
+        return double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result)
+            ? result
+            : 0.0;
+    }
+
     public string ToFormattedSummary(int partition, long offset)
     {
         return $"""

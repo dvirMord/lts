@@ -62,5 +62,19 @@ public static class Constatns
         public const string ConsumerLoopError = "Unexpected error in consume loop for partition {Partition}.";
         public const string ConsumerResourcesCleanedUp = "Consumer resources cleaned up for partition {Partition}.";
         public const string ConsumeException = "Kafka consume exception: {Reason}";
+        public const string RaycastIntersectionResult = "[Partition {Partition}] Raycast intersection result: HasIntersection={HasIntersection}, Lat={Lat}, Lon={Lon}, Alt={Alt}m, SlantRange={SlantRange}m";
+    }
+
+    public static class GeoServerConfig
+    {
+        public const string BaseAddress = "http://localhost:18080";
+        public const string RaycastEndpoint = "/api/v1/calculate";
+        public const int TimeoutSeconds = 2;
+    }
+
+    public static class GeoServerMessages
+    {
+        public const string UnexpectedStatusCode = "GeoServer returned unexpected status code: {StatusCode}";
+        public const string CommunicationError = "Failed to communicate with GeoServer raycast endpoint.";
     }
 }
