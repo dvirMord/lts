@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using static lts.Constants.Constatns.KafkaDefaults;
+using static lts.Constants.Constants.KafkaDefaults;
 
 namespace lts.Configuration;
 public class KafkaConsumerConfig

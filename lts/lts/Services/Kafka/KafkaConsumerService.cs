@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 
 using lts.Configuration;
 using lts.Interfaces;
-using static lts.Constants.Constatns.KafkaDefaults;
-using static lts.Constants.Constatns.Logging;
+using static lts.Constants.Constants.KafkaDefaults;
+using static lts.Constants.Constants.Logging;
 
 namespace lts.Services;
 public class KafkaConsumerService : IKafkaConsumerService

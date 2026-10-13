@@ -2,9 +2,9 @@ using lts.Configuration;
 using lts.Interfaces;
 using lts.Services;
 using lts.Services.GeoServerService;
-using static lts.Constants.Constatns;
-using static lts.Constants.Constatns.SwaggerConfig;
-using static lts.Constants.Constatns.Logging;
+using static lts.Constants.Constants;
+using static lts.Constants.Constants.SwaggerConfig;
+using static lts.Constants.Constants.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,11 +23,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSingleton<IKafkaConsumerFactory, KafkaConsumerFactory>();
 builder.Services.AddSingleton<ITelemetryStreamService, TelemetryStreamService>();
-builder.Services.AddHttpClient<IGeoServerClient, GeoServerClient>(client =>
-{
-    client.BaseAddress = new Uri(GeoServerConfig.BaseAddress);
-    client.Timeout = TimeSpan.FromSeconds(GeoServerConfig.TimeoutSeconds);
-});
+builder.Services.AddSingleton<IGeoServerClient, GeoServerClient>();
+builder.Services.AddHostedService<GeoServerListenerHostedService>();
 
 // Kafka Configuration
 builder.Services.Configure<KafkaConsumerConfig>(
@@ -54,7 +51,7 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = SwaggerConfig.RoutePrefix;
     });
 
-    logger.LogInformation(SwaggerUrl, "http://localhost:5000");
+    logger.LogInformation(SwaggerUrl, TelemetryStreamAdditionalMessages.SwaggerUrlLocalhost);
 }
 
 app.MapControllers();

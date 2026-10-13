@@ -1,6 +1,6 @@
 namespace lts.Constants;
 
-public static class Constatns
+public static class Constants
 {
     public static class partitionDTOs
     {
@@ -70,11 +70,31 @@ public static class Constatns
         public const string BaseAddress = "http://localhost:18080";
         public const string RaycastEndpoint = "/api/v1/calculate";
         public const int TimeoutSeconds = 2;
+        public const int port = 18080;
+        public const string ip = "127.0.0.1";
     }
 
     public static class GeoServerMessages
     {
         public const string UnexpectedStatusCode = "GeoServer returned unexpected status code: {StatusCode}";
         public const string CommunicationError = "Failed to communicate with GeoServer raycast endpoint.";
+    }
+
+    public static class GeoServerSocketMessages
+    {
+        public const string ListenerStarting = "Starting GeoServer background socket listener...";
+        public const string ListeningStarted = "GeoServer Socket listening on {Ip}:{Port}...";
+        public const string ClientConnected = "New client connected to LTS Socket: {RemoteEndpoint}";
+        public const string ListenerStopped = "GeoServer listener gracefully stopped.";
+        public const string ListenerError = "Error occurred in GeoServer socket listener.";
+        public const string FrameSentSuccess = "[Partition {Partition}] Telemetry frame successfully streamed to GeoServer socket client.";
+        public const string ClientNotActive = "[Partition {Partition}] No active socket client connected or send failed.";
+        public const string StreamFrameError = "Failed to stream frame to client: {Message}";
+        public const string NewlineCharacter = "\n";
+    }
+
+    public static class TelemetryStreamAdditionalMessages
+    {
+        public const string SwaggerUrlLocalhost = "http://localhost:5094";
     }
 }

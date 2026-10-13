@@ -3,7 +3,7 @@ using lts.DTOs;
 using lts.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
-using static lts.Constants.Constatns.ControllerMessages;
+using static lts.Constants.Constants.ControllerMessages;
 
 [ApiController]
 [Route("api/lts/v1")]

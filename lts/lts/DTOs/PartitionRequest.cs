@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static lts.Constants.Constatns;
+using static lts.Constants.Constants;
 namespace lts.DTOs;
 public class PartitionRequest
 {

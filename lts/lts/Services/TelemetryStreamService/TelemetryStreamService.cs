@@ -7,7 +7,8 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using static lts.Constants.Constatns;
+using static lts.Constants.Constants;
+using static lts.Constants.Constants.GeoServerSocketMessages;
 
 namespace lts.Services;
 public class TelemetryStreamService: ITelemetryStreamService
@@ -92,17 +93,14 @@ public class TelemetryStreamService: ITelemetryStreamService
                                 frameSummary);
 
                             var raycastRequest = frame.ToRaycastRequest();
-                            var raycastResult = await this._geoServerClient.CalculateIntersectionAsync(raycastRequest, ct);
-                            if (raycastResult != null)
+                            bool sent = await this._geoServerClient.SendTelemetryFrameAsync(raycastRequest, ct);
+                            if (sent)
                             {
-                                this._logger.LogInformation(
-                                    TelemetryStreamMessages.RaycastIntersectionResult,
-                                    result.Partition.Value,
-                                    raycastResult.HasIntersection,
-                                    raycastResult.GroundLatitude,
-                                    raycastResult.GroundLongitude,
-                                    raycastResult.GroundAltitudeMeters,
-                                    raycastResult.SlantRangeMeters);
+                                this._logger.LogInformation(FrameSentSuccess, result.Partition.Value);
+                            }
+                            else
+                            {
+                                this._logger.LogWarning(ClientNotActive, result.Partition.Value);
                             }
                         }
                         else
