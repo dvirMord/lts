@@ -38,13 +38,13 @@ public class KafkaConsumerService : IKafkaConsumerService
         {
             return _kafkaConsumer.Consume(ct);
         }
-        catch (OperationCanceledException)
+        catch (Exception ex)
         {
-            return null;
-        }
-        catch (ConsumeException ex)
-        {
-            this._logger.LogError(ex, KafkaConsumeError, ex.Error.Reason);
+            if (ex is not OperationCanceledException)
+            {
+                this._logger.LogError(ex, KafkaConsumeError, ex is ConsumeException cex ? cex.Error.Reason : ex.Message);
+            }
+
             return null;
         }
     }

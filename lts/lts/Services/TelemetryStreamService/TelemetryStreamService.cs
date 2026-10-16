@@ -68,7 +68,6 @@ public class TelemetryStreamService: ITelemetryStreamService
     private async Task ConsumeLoop(int partition, CancellationToken ct)
     {
         using var consumer = this._kafkaConsumerFactory.CreateConsumer(partition);
-
         this._logger.LogInformation(TelemetryStreamMessages.ConsumerWorkerAttached, partition);
 
         try
@@ -76,49 +75,12 @@ public class TelemetryStreamService: ITelemetryStreamService
             while (!ct.IsCancellationRequested)
             {
                 var result = consumer.ConsumeTelemetryFrames(ct);
-
-                if (result?.Message?.Value != null)
+                if (result?.Message?.Value is null)
                 {
-                    string rawJson = result.Message.Value;
-
-                    try
-                    {
-                        var frame = JsonSerializer.Deserialize<KafkaTelemetryFrame>(rawJson);
-                        if (frame != null)
-                        {
-                            string frameSummary = frame.ToFormattedSummary(result.Partition.Value, result.Offset.Value);
-                            this._logger.LogInformation(TelemetryStreamMessages.TelemetryFrameParsed,
-                                result.Partition.Value,
-                                result.Offset.Value,
-                                frameSummary);
-
-                            var raycastRequest = frame.ToRaycastRequest();
-                            bool sent = await this._geoServerClient.SendTelemetryFrameAsync(raycastRequest, ct);
-                            if (sent)
-                            {
-                                this._logger.LogInformation(FrameSentSuccess, result.Partition.Value);
-                            }
-                            else
-                            {
-                                this._logger.LogWarning(ClientNotActive, result.Partition.Value);
-                            }
-                        }
-                        else
-                        {
-                            this._logger.LogInformation(TelemetryStreamMessages.PayloadReceived,
-                                result.Partition.Value,
-                                result.Offset.Value,
-                                rawJson);
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        this._logger.LogInformation(TelemetryStreamMessages.PayloadReceived,
-                            result.Partition.Value,
-                            result.Offset.Value,
-                            rawJson);
-                    }
+                    continue;
                 }
+
+                await ProcessConsumeResultAsync(result, ct);
             }
         }
         catch (ConsumeException ex)
@@ -139,5 +101,60 @@ public class TelemetryStreamService: ITelemetryStreamService
             this._activeStreams.TryRemove(partition, out _);
             this._logger.LogInformation(TelemetryStreamMessages.ConsumerResourcesCleanedUp, partition);
         }
+    }
+
+    private async Task ProcessConsumeResultAsync(ConsumeResult<string?, string> result, CancellationToken ct)
+    {
+        string rawJson = result.Message.Value;
+        var frame = TryDeserializeFrame(rawJson);
+
+        if (frame is null)
+        {
+            this._logger.LogInformation(
+                TelemetryStreamMessages.PayloadReceived,
+                result.Partition.Value,
+                result.Offset.Value,
+                rawJson);
+            return;
+        }
+
+        LogParsedFrame(result, frame);
+        await DispatchFrameAsync(result.Partition.Value, frame, ct);
+    }
+
+    private KafkaTelemetryFrame? TryDeserializeFrame(string rawJson)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<KafkaTelemetryFrame>(rawJson);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    private void LogParsedFrame(ConsumeResult<string?, string> result, KafkaTelemetryFrame frame)
+    {
+        string frameSummary = frame.ToFormattedSummary(result.Partition.Value, result.Offset.Value);
+        this._logger.LogInformation(
+            TelemetryStreamMessages.TelemetryFrameParsed,
+            result.Partition.Value,
+            result.Offset.Value,
+            frameSummary);
+    }
+
+    private async Task DispatchFrameAsync(int partition, KafkaTelemetryFrame frame, CancellationToken ct)
+    {
+        RaycastRequestDto raycastRequest = frame.ToRaycastRequest();
+        bool sent = await this._geoServerClient.SendTelemetryFrameAsync(raycastRequest, ct);
+
+        if (!sent)
+        {
+            this._logger.LogWarning(ClientNotActive, partition);
+            return;
+        }
+
+        this._logger.LogInformation(FrameSentSuccess, partition);
     }
 }
