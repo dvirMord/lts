@@ -43,16 +43,13 @@ public class GeoServerClient : IGeoServerClient
                 this._networkStream = geoServerClient.GetStream();
             }
         }
+        catch (OperationCanceledException)
+        {
+            this._logger.LogInformation(ListenerStopped);
+        }
         catch (Exception ex)
         {
-            if (ex is OperationCanceledException)
-            {
-                this._logger.LogInformation(ListenerStopped);
-            }
-            else
-            {
-                this._logger.LogError(ex, ListenerError);
-            }
+            this._logger.LogError(ex, ListenerError);
         }
         finally
         {
