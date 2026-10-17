@@ -1,23 +1,61 @@
+using lts.Configuration;
+using lts.Interfaces;
+using lts.Services;
+using lts.Services.GeoServerService;
+using static lts.Constants.Constants;
+using static lts.Constants.Constants.SwaggerConfig;
+using static lts.Constants.Constants.Logging;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Add services
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc(SwaggerConfig.Version, new()
+    {
+        Title = SwaggerConfig.Title,
+        Version = SwaggerConfig.Version,
+        Description = SwaggerConfig.Description
+    });
+});
+
+builder.Services.AddSingleton<IKafkaConsumerFactory, KafkaConsumerFactory>();
+builder.Services.AddSingleton<ITelemetryStreamService, TelemetryStreamService>();
+builder.Services.AddSingleton<IGeoServerClient, GeoServerClient>();
+builder.Services.AddHostedService<GeoServerListenerHostedService>();
+
+// Kafka Configuration
+builder.Services.Configure<KafkaConsumerConfig>(
+    builder.Configuration.GetSection(KafkaConsumerConfig.SectionName));
+
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 var app = builder.Build();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-// Configure the HTTP request pipeline.
+logger.LogInformation(ApplicationStarting);
+logger.LogInformation(app.Environment.IsDevelopment() ? EnvironmentDev : EnvironmentProd);
+
+// Configure HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint(SwaggerConfig.Endpoint, $"{SwaggerConfig.Title} {SwaggerConfig.Version}");
+        options.RoutePrefix = SwaggerConfig.RoutePrefix;
+    });
+
+    logger.LogInformation(SwaggerUrl, TelemetryStreamAdditionalMessages.SwaggerUrlLocalhost);
 }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.MapControllers();
+
+logger.LogInformation(ApplicationStarted);
 
 app.Run();
