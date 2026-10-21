@@ -11,6 +11,9 @@ public class RaycastRequestDto
     public double GimbalAzimuthDeg { get; set; }
     public double GimbalElevationDeg { get; set; }
     public double GimbalRollDeg { get; set; }
+    public double? FrameCenterLatitude { get; set; }
+    public double? FrameCenterLongitude { get; set; }
+    public double? FrameCenterElevation { get; set; }
 }
 
 public class RaycastResponseDto
