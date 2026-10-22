@@ -64,7 +64,10 @@ public class KafkaTelemetryFrame
             PlatformRollDeg = ParseDouble(PlatformRollAngle),
             GimbalAzimuthDeg = ParseDouble(SensorRelativeAzimuthAngle),
             GimbalElevationDeg = ParseDouble(SensorRelativeElevationAngle),
-            GimbalRollDeg = 0.0
+            GimbalRollDeg = 0.0,
+            FrameCenterLatitude = ParseDoubleOrNull(FrameCenterLatitude),
+            FrameCenterLongitude = ParseDoubleOrNull(FrameCenterLongitude),
+            FrameCenterElevation = ParseDoubleOrNull(FrameCenterElevation)
         };
     }
 
@@ -73,6 +76,13 @@ public class KafkaTelemetryFrame
         return double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result)
             ? result
             : 0.0;
+    }
+
+    private static double? ParseDoubleOrNull(string? value)
+    {
+        return double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result)
+            ? result
+            : null;
     }
 
     public string ToFormattedSummary(int partition, long offset)
