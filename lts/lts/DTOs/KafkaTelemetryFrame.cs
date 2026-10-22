@@ -56,26 +56,18 @@ public class KafkaTelemetryFrame
     {
         return new RaycastRequestDto
         {
-            SensorLatitude = ParseDouble(SensorLatitude),
-            SensorLongitude = ParseDouble(SensorLongitude),
-            SensorAltitudeMeters = ParseDouble(SensorTrueAltitude),
-            PlatformHeadingDeg = ParseDouble(PlatformHeadingAngle),
-            PlatformPitchDeg = ParseDouble(PlatformPitchAngle),
-            PlatformRollDeg = ParseDouble(PlatformRollAngle),
-            GimbalAzimuthDeg = ParseDouble(SensorRelativeAzimuthAngle),
-            GimbalElevationDeg = ParseDouble(SensorRelativeElevationAngle),
-            GimbalRollDeg = 0.0,
+            SensorLatitude = ParseDoubleOrNull(SensorLatitude),
+            SensorLongitude = ParseDoubleOrNull(SensorLongitude),
+            SensorAltitudeMeters = ParseDoubleOrNull(SensorTrueAltitude),
+            PlatformHeadingDeg = ParseDoubleOrNull(PlatformHeadingAngle),
+            PlatformPitchDeg = ParseDoubleOrNull(PlatformPitchAngle),
+            PlatformRollDeg = ParseDoubleOrNull(PlatformRollAngle),
+            GimbalAzimuthDeg = ParseDoubleOrNull(SensorRelativeAzimuthAngle),
+            GimbalElevationDeg = ParseDoubleOrNull(SensorRelativeElevationAngle),
             FrameCenterLatitude = ParseDoubleOrNull(FrameCenterLatitude),
             FrameCenterLongitude = ParseDoubleOrNull(FrameCenterLongitude),
             FrameCenterElevation = ParseDoubleOrNull(FrameCenterElevation)
         };
-    }
-
-    private static double ParseDouble(string? value)
-    {
-        return double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var result)
-            ? result
-            : 0.0;
     }
 
     private static double? ParseDoubleOrNull(string? value)
